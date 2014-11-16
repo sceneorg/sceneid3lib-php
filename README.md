@@ -1,4 +1,4 @@
-# SceneId 3.0 connection library
+# SceneID 3.0 connection library
 
 This is a small PHP helper library to connect and authenticate with the SceneID 3.0 service provided by scene.org.
 
