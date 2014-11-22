@@ -98,8 +98,8 @@ class SceneID3OAuth
   {
     $ch = curl_init();
 
-    $a = array();
-    foreach($headerArray as $k=>$v) $a[] = $k.": ".$v;
+    $headerStrArray = array();
+    foreach($headerArray as $k=>$v) $headerStrArray[] = $k.": ".$v;
 
     $getArray  = $method == "GET"  ? $contentArray : array();
     $postArray = $method == "POST" ? $contentArray : array();
@@ -125,7 +125,7 @@ class SceneID3OAuth
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $a);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headerStrArray);
 
     $data = curl_exec($ch);
     curl_close($ch);
