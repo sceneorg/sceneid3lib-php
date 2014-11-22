@@ -49,7 +49,8 @@ class SceneID3OAuth
 {
   const ENDPOINT_TOKEN = "https://id.scene.org/oauth/token/";
   const ENDPOINT_AUTH = "https://id.scene.org/oauth/authorize/";
-  const ENDPOINT_RESOURCE ="https://id.scene.org/3/api/3.0";
+  const ENDPOINT_TOKENINFO = "https://id.scene.org/oauth/tokeninfo/";
+  const ENDPOINT_RESOURCE = "https://id.scene.org/3/api/3.0";
 
   protected $clientID = null;
   protected $clientSecret = null;
@@ -362,6 +363,28 @@ class SceneID3OAuth
     $data = $this->Request( $url, $method, $params, array("Authorization"=>$auth2) );
     
     return $data;
+  }
+
+  /**
+   * Verify the incoming token that it belongs to us
+   * @return bool true on success
+   * @throws SceneID3Exception Exception is thrown if the token
+   *    belongs to a different application
+   */
+  function VerifyToken()
+  {
+    if (!static::ENDPOINT_TOKENINFO) // in case we don't provide one
+      throw new SceneID3Exception("No token info endpoint available!");
+     
+    $data = $this->ResourceRequest( static::ENDPOINT_TOKENINFO );
+    $info = json_decode($data);
+    if (!$info)
+      throw new SceneID3Exception("Invalid token!");
+
+    if ($info->client_id != $this->clientID)
+      throw new SceneID3Exception("This token belongs to a different client!");
+    
+    return true;
   }
 
   /**
