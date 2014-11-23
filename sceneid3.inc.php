@@ -41,7 +41,7 @@ class SceneID3SessionStorage implements SceneID3StorageInterface
   {
     if (!$_SESSION["sceneID"])
       return null;
-    return $_SESSION["sceneID"][$key];
+    return @$_SESSION["sceneID"][$key];
   }
 }
 
@@ -159,7 +159,7 @@ class SceneID3OAuth
       throw new SceneID3AuthException("Authorization failed", 0, null, $data);
 
     $this->storage->set("accessToken",$authTokens->access_token);
-    if ($authTokens->refresh_token)
+    if (@$authTokens->refresh_token)
       $this->storage->set("refreshToken",$authTokens->refresh_token);
 
     return true;
@@ -401,7 +401,7 @@ class SceneID3OAuth
      
     $data = $this->ResourceRequest( $url, $method, $params );
     $error = json_decode($data);
-    if ($error && $error->error == "invalid_token")
+    if ($error && @$error->error == "invalid_token")
     {
       $this->RefreshToken();
       $data = $this->ResourceRequest( $url, $method, $params );
