@@ -13,7 +13,9 @@ class SceneID3AuthException extends SceneID3Exception
   {
     $data = json_decode($dataJSON);
     if ($data && $data->error_description)
-      $message .= ": " . $data->error_description;
+      $message .= ": " . $data;
+    else
+      $message .= ": \"" . $dataJSON . "\"";
     parent::__construct($message, $code, $previous);    
   }
 }
@@ -159,7 +161,7 @@ class SceneID3OAuth
 
     $authTokens = json_decode( $data );
 
-    if (!$authTokens || !$authTokens->access_token)
+    if (!@$authTokens || !@$authTokens->access_token)
       throw new SceneID3AuthException("Authorization failed", 0, null, $data);
 
     $this->storage->set("accessToken",$authTokens->access_token);
