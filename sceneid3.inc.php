@@ -30,9 +30,13 @@ class SceneID3SessionStorage implements SceneID3StorageInterface
     if ($start)
       @session_start();
   }
+  public function Reset()
+  {
+    $_SESSION["sceneID"] = array();
+  }
   public function Set( $key, $value )
   { 
-    if (!$_SESSION["sceneID"])
+    if (!@$_SESSION["sceneID"])
       $_SESSION["sceneID"] = array();
       
     $_SESSION["sceneID"][$key] = $value;
@@ -398,6 +402,11 @@ class SceneID3OAuth
   {
     if (!$url)
       $url = static::ENDPOINT_RESOURCE;
+      
+    if (!$this->IsAuthenticated())
+    {
+      $this->GetClientCredentialsToken();
+    }
      
     $data = $this->ResourceRequest( $url, $method, $params );
     $error = json_decode($data);
@@ -408,6 +417,23 @@ class SceneID3OAuth
     }
     return $data;
   }
+
+  /**
+   * Tests whether the instance is authenticated
+   * @return bool True if the instance has a valid access token.
+   */
+  function IsAuthenticated()
+  {
+    return !!$this->storage->get("accessToken");
+  }
+
+  /**
+   * Resets the entire internal token storage
+   */
+  function Reset()
+  {
+    $this->storage->Reset();
+  }  
 }
 
 class SceneID3 extends SceneID3OAuth
