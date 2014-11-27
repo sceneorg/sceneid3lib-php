@@ -20,6 +20,9 @@ $sceneID = new SceneID3( array(
 
 try
 {
+  // this is optional to call explicitly
+  // resource calls will automatically call this
+  // if there's no access token claimed yet.
   $sceneID->GetClientCredentialsToken();
 
   // We got it, now we can query at will
@@ -30,6 +33,11 @@ catch( SceneID3AuthException $e )
 {
   // something went wrong
 }
+
+/////////////////////////////////////////////////
+// if we want to invalidate the previous token
+// we can call Reset()
+$sceneID->Reset();
 
 /////////////////////////////////////////////////
 // Act 2 - Operations that do require a user
