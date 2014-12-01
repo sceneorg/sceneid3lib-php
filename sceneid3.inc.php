@@ -56,7 +56,7 @@ class SceneID3OAuth
   const ENDPOINT_TOKEN = "https://id.scene.org/oauth/token/";
   const ENDPOINT_AUTH = "https://id.scene.org/oauth/authorize/";
   const ENDPOINT_TOKENINFO = "https://id.scene.org/oauth/tokeninfo/";
-  const ENDPOINT_RESOURCE = "https://id.scene.org/3/api/3.0";
+  const ENDPOINT_RESOURCE = "https://id.scene.org/api/3.0";
 
   protected $clientID = null;
   protected $clientSecret = null;
