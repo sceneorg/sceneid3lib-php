@@ -193,6 +193,10 @@ class SceneID3OAuth
     if (is_string($scope))
       $scope = preg_split("/\s+/",$scope);
       
+    // basic scope is always on
+    if (array_search("basic",$scope) === false)
+      $scope[] = "basic";
+
     $this->scope = $scope;
   }
   
