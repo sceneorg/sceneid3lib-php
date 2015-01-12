@@ -78,9 +78,6 @@ class SceneID3OAuth
    */  
   function __construct( $options = array() )
   {
-    if (!function_exists("curl_init"))
-      throw new SceneID3Exception("cURL not installed!");
-    
     $mandatory = array("clientID","clientSecret","redirectURI");
     foreach($mandatory as $v)
     {
@@ -100,8 +97,42 @@ class SceneID3OAuth
    * @param string $contentArray Key-value pairs to be sent in the request body
    * @param string $headerArray HTTP headers to be sent
    * @return string The URL contents
-   */  
-  protected function Request( $url, $method = "GET", $contentArray = array(), $headerArray = array() )
+   */
+  protected function RequestFGC( $url, $method = "GET", $contentArray = array(), $headerArray = array() )
+  {
+    $headerStrArray = array();
+    foreach($headerArray as $k=>$v) $headerStrArray[] = $k.": ".$v;
+
+    $getArray  = $method == "GET"  ? $contentArray : array();
+    $postArray = $method == "POST" ? $contentArray : array();
+    
+    $getArray["format"] = $this->format;
+    
+    if ($getArray)
+    {
+      $data = http_build_query($getArray);
+      $url .= "?" . $data;
+    }
+    
+    if ($postArray)
+    {
+      $data = http_build_query($contentArray);
+    }
+
+    $data = file_get_contents( $url, false, stream_context_create( array(
+      'http'=>array(
+        'method'=>$method,
+        'header'=>implode("\r\n",$headerStrArray),
+        'content'=>$data
+      ),
+      'ssl' => array(
+        'verify_peer' => false,
+      ),      
+    ) ) );
+
+    return $data;
+  }   
+  protected function RequestCURL( $url, $method = "GET", $contentArray = array(), $headerArray = array() )
   {
     $ch = curl_init();
 
@@ -138,6 +169,13 @@ class SceneID3OAuth
     curl_close($ch);
 
     return $data;
+  }
+  protected function Request( $url, $method = "GET", $contentArray = array(), $headerArray = array() )
+  {
+    if (function_exists("curl_init"))
+      return $this->RequestCURL( $url, $method, $contentArray, $headerArray );
+    
+    return $this->RequestFGC( $url, $method, $contentArray, $headerArray );
   }
 
   /**
