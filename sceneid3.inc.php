@@ -13,7 +13,7 @@ class SceneID3AuthException extends SceneID3Exception
   {
     $data = json_decode($dataJSON);
     if ($data && $data->error_description)
-      $message .= ": " . $data;
+      $message .= ": " . $data->error_description;
     else
       $message .= ": \"" . $dataJSON . "\"";
     parent::__construct($message, $code, $previous);    
