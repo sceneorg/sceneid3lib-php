@@ -4,19 +4,19 @@
  * Wrapper library for authenticating and using SceneID 3.0
  * @author Gargaj / Conspiracy <gargaj@scene.org>
  */
- 
+
 class SceneID3Exception extends Exception {}
 
-class SceneID3AuthException extends SceneID3Exception 
+class SceneID3AuthException extends SceneID3Exception
 {
-  public function __construct($message, $code = 0, Exception $previous = null, $dataJSON = "") 
+  public function __construct($message, $code = 0, Exception $previous = null, $dataJSON = "")
   {
     $data = json_decode($dataJSON);
     if ($data && $data->error_description)
       $message .= ": " . $data->error_description;
     else
       $message .= ": \"" . $dataJSON . "\"";
-    parent::__construct($message, $code, $previous);    
+    parent::__construct($message, $code, $previous);
   }
 }
 
@@ -25,7 +25,7 @@ interface SceneID3StorageInterface {
   public function Get( $key );
 }
 
-class SceneID3SessionStorage implements SceneID3StorageInterface 
+class SceneID3SessionStorage implements SceneID3StorageInterface
 {
   public function __construct( $start = true )
   {
@@ -37,10 +37,10 @@ class SceneID3SessionStorage implements SceneID3StorageInterface
     $_SESSION["sceneID"] = array();
   }
   public function Set( $key, $value )
-  { 
+  {
     if (!@$_SESSION["sceneID"])
       $_SESSION["sceneID"] = array();
-      
+
     $_SESSION["sceneID"][$key] = $value;
   }
   public function Get( $key )
@@ -62,7 +62,7 @@ class SceneID3OAuth
   protected $clientSecret = null;
   protected $redirectURI = null;
   protected $scope = array();
-  
+
   protected $format = "json";
   protected $storage = null;
 
@@ -75,12 +75,12 @@ class SceneID3OAuth
    *   clientID     - OAuth2 client ID
    *   clientSecret - OAuth2 client secret
    *   redirectURI  - OAuth2 redirect/return URL
-   */  
+   */
   function __construct( $options = array() )
   {
     if (!function_exists("curl_init"))
       throw new SceneID3Exception("cURL not installed!");
-    
+
     $mandatory = array("clientID","clientSecret","redirectURI");
     foreach($mandatory as $v)
     {
@@ -88,7 +88,7 @@ class SceneID3OAuth
         throw new Exception("'".$v."' invalid or missing from initializer array!");
       $this->$v = $options[$v];
     }
-   
+
     $this->storage = new SceneID3SessionStorage();
   }
 
@@ -100,7 +100,7 @@ class SceneID3OAuth
    * @param string $contentArray Key-value pairs to be sent in the request body
    * @param string $headerArray HTTP headers to be sent
    * @return string The URL contents
-   */  
+   */
   protected function Request( $url, $method = "GET", $contentArray = array(), $headerArray = array() )
   {
     $ch = curl_init();
@@ -110,15 +110,15 @@ class SceneID3OAuth
 
     $getArray  = $method == "GET"  ? $contentArray : array();
     $postArray = $method == "POST" ? $contentArray : array();
-    
+
     $getArray["format"] = $this->format;
-    
+
     if ($getArray)
     {
       $data = http_build_query($getArray);
       $url .= "?" . $data;
     }
-    
+
     if ($postArray)
     {
       $data = http_build_query($contentArray);
@@ -156,7 +156,7 @@ class SceneID3OAuth
     $params = array("grant_type"=>"client_credentials");
     if ($this->scope)
       $params["scope"] = implode(" ",$this->scope);
-    
+
     $data = $this->Request( static::ENDPOINT_TOKEN, "POST", $params, array("Authorization"=>$authString) );
 
     $authTokens = json_decode( $data );
@@ -170,7 +170,7 @@ class SceneID3OAuth
 
     return true;
   }
-  
+
   /**
    * Sets a new storage handler
    * @param object $storage The new storage handler implementing SceneID3StorageInterface
@@ -180,10 +180,10 @@ class SceneID3OAuth
   {
     if (!($storage instanceof SceneID3StorageInterface))
       throw new SceneID3Exception("Storage class must implement SceneID3StorageInterface");
-      
+
     $this->storage = $storage;
   }
-  
+
   /**
    * Sets the request scope
    * @param array $scope The requested scopes
@@ -192,14 +192,14 @@ class SceneID3OAuth
   {
     if (is_string($scope))
       $scope = preg_split("/\s+/",$scope);
-      
+
     // basic scope is always on
     if (array_search("basic",$scope) === false)
       $scope[] = "basic";
 
     $this->scope = $scope;
   }
-  
+
   /**
    * Sets the communication format
    * @param string $format The communication format - must be either "json" or "xml"
@@ -210,10 +210,10 @@ class SceneID3OAuth
     $format = strtolower($format);
     if (array_search($format,array("json","xml"))===false)
       throw new SceneID3Exception("Format has to be either XML or JSON!");
-      
+
     $this->format = $format;
   }
-  
+
   /**
    * Unpack string data according to the given format
    * @param string $data The incoming data
@@ -230,7 +230,7 @@ class SceneID3OAuth
     }
     return null;
   }
-  
+
   /**
    * Generates "state" string
    * @return string The "state" string
@@ -239,7 +239,7 @@ class SceneID3OAuth
   {
     return rand(0,0x7FFFFFFF);
   }
-  
+
   /**
    * Retrieves authentication endpoint URL and parameters
    * @return string The authentication URL and query string
@@ -259,7 +259,7 @@ class SceneID3OAuth
     }
     if ($this->scope)
       $params["scope"] = implode(" ",$this->scope);
-      
+
     return static::ENDPOINT_AUTH . "?" . http_build_query($params);
   }
 
@@ -291,7 +291,7 @@ class SceneID3OAuth
 
     if (!$state)
       $state = $_GET["state"];
-      
+
     if ($this->storage)
     {
       if ( $this->storage->get("state") != $state )
@@ -299,7 +299,7 @@ class SceneID3OAuth
     }
 
     $authString = "Basic " . base64_encode( $this->clientID . ":" . $this->clientSecret );
-    
+
     $params = array(
       "grant_type"   => "authorization_code",
       "code"         => $code,
@@ -309,7 +309,7 @@ class SceneID3OAuth
     $data = $this->Request( static::ENDPOINT_TOKEN, "POST", $params, array("Authorization"=>$authString) );
 
     $authTokens = json_decode( $data );
-    
+
     if (!$authTokens || !$authTokens->access_token)
       throw new SceneID3AuthException("Authorization failed", 0, null, $data);
 
@@ -328,9 +328,9 @@ class SceneID3OAuth
 
     if (!$refreshToken)
       throw new SceneID3Exception("Not authenticated!");
-  
+
     $authString = "Basic " . base64_encode( $this->clientID . ":" . $this->clientSecret );
-    
+
     $params = array(
       "grant_type"    => "refresh_token",
       "refresh_token" => $refreshToken,
@@ -339,7 +339,7 @@ class SceneID3OAuth
     $data = $this->Request( static::ENDPOINT_TOKEN, "POST", $params, array("Authorization"=>$authString) );
 
     $authTokens = json_decode( $data );
-    
+
     if (!$authTokens || !$authTokens->access_token)
       throw new SceneID3AuthException("Authorization failed", 0, null, $data);
 
@@ -349,7 +349,7 @@ class SceneID3OAuth
 
     return true;
   }
-    
+
   /**
    * Send authenticated request to URL
    * @param string $url The endpoint URL
@@ -363,15 +363,15 @@ class SceneID3OAuth
   {
     if (!$url)
       $url = static::ENDPOINT_RESOURCE;
-      
+
     $accessToken = $this->storage->get("accessToken");
 
     if (!$accessToken)
       throw new SceneID3Exception("Not authenticated!");
-      
+
     $auth2 = "Bearer ".$accessToken;
     $data = $this->Request( $url, $method, $params, array("Authorization"=>$auth2) );
-    
+
     return $data;
   }
 
@@ -385,7 +385,7 @@ class SceneID3OAuth
   {
     if (!static::ENDPOINT_TOKENINFO) // in case we don't provide one
       throw new SceneID3Exception("No token info endpoint available!");
-     
+
     $data = $this->ResourceRequest( static::ENDPOINT_TOKENINFO );
     $info = json_decode($data);
     if (!$info)
@@ -393,7 +393,7 @@ class SceneID3OAuth
 
     if ($info->client_id != $this->clientID)
       throw new SceneID3Exception("This token belongs to a different client!");
-    
+
     return true;
   }
 
@@ -408,12 +408,12 @@ class SceneID3OAuth
   {
     if (!$url)
       $url = static::ENDPOINT_RESOURCE;
-      
+
     if (!$this->IsAuthenticated())
     {
       $this->GetClientCredentialsToken();
     }
-     
+
     $data = $this->ResourceRequest( $url, $method, $params );
     $error = json_decode($data);
     if ($error && @$error->error == "invalid_token")
@@ -439,7 +439,7 @@ class SceneID3OAuth
   function Reset()
   {
     $this->storage->Reset();
-  }  
+  }
 }
 
 class SceneID3 extends SceneID3OAuth
