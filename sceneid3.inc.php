@@ -45,7 +45,7 @@ class SceneID3SessionStorage implements SceneID3StorageInterface
   }
   public function Get( $key )
   {
-    if (!$_SESSION["sceneID"])
+    if (!@$_SESSION["sceneID")
       return null;
     return @$_SESSION["sceneID"][$key];
   }
