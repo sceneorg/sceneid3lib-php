@@ -333,7 +333,7 @@ class SceneID3OAuth
     if ($this->storage)
     {
       if ( $this->storage->get("state") != $state )
-        throw new SceneID3Exception("State mismatch!");
+        throw new SceneID3Exception("State mismatch - try clearing your browser cookies!");
     }
 
     $authString = "Basic " . base64_encode( $this->clientID . ":" . $this->clientSecret );
