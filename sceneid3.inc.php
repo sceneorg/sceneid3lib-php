@@ -454,7 +454,7 @@ class SceneID3OAuth
 
     $data = $this->ResourceRequest( $url, $method, $params );
     $error = json_decode($data);
-    if ($error && @$error->error == "invalid_token")
+    if ($error && @$error->error === "invalid_token")
     {
       $this->RefreshToken();
       $data = $this->ResourceRequest( $url, $method, $params );
