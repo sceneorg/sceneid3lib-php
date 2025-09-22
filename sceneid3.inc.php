@@ -9,7 +9,7 @@ class SceneID3Exception extends Exception {}
 
 class SceneID3AuthException extends SceneID3Exception
 {
-  public function __construct($message, $code = 0, Exception $previous = null, $dataJSON = "")
+  public function __construct($message, $code = 0, $previous = null, $dataJSON = "")
   {
     $data = json_decode($dataJSON);
     if ($data && $data->error_description)
