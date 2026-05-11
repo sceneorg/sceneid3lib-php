@@ -352,7 +352,7 @@ class SceneID3OAuth
       throw new SceneID3AuthException("Authorization failed", 0, null, $data);
 
     $this->storage->set("accessToken",$authTokens->access_token);
-    if ($authTokens->refresh_token)
+    if (@$authTokens->refresh_token)
       $this->storage->set("refreshToken",$authTokens->refresh_token);
 
     return true;
@@ -382,7 +382,7 @@ class SceneID3OAuth
       throw new SceneID3AuthException("Authorization failed", 0, null, $data);
 
     $this->storage->set("accessToken",$authTokens->access_token);
-    if ($authTokens->refresh_token)
+    if (@$authTokens->refresh_token)
       $this->storage->set("refreshToken",$authTokens->refresh_token);
 
     return true;
