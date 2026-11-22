@@ -348,8 +348,12 @@ class SceneID3OAuth
 
     $authTokens = json_decode( $data );
 
-    if (!$authTokens || !$authTokens->access_token)
+    if (!$authTokens || !@$authTokens->access_token)
+    {
+      $this->storage->set("accessToken", null);
+      $this->storage->set("refreshToken", null);
       throw new SceneID3AuthException("Authorization failed", 0, null, $data);
+    }
 
     $this->storage->set("accessToken",$authTokens->access_token);
     if (@$authTokens->refresh_token)
@@ -378,8 +382,12 @@ class SceneID3OAuth
 
     $authTokens = json_decode( $data );
 
-    if (!$authTokens || !$authTokens->access_token)
+    if (!$authTokens || !@$authTokens->access_token)
+    {
+      $this->storage->set("accessToken", null);
+      $this->storage->set("refreshToken", null);
       throw new SceneID3AuthException("Authorization failed", 0, null, $data);
+    }
 
     $this->storage->set("accessToken",$authTokens->access_token);
     if (@$authTokens->refresh_token)
